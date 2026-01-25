@@ -1,0 +1,26 @@
+{
+  "name": "Tiendanube - List Products",
+  "request": {
+    "method": "GET",
+    "header": [
+      {
+        "key": "Authentication",
+        "value": "bearer {{TIENDANUBE_ACCESS_TOKEN}}"
+      },
+      {
+        "key": "User-Agent",
+        "value": "app-chatwoot (srozenberg@frba.utn.edu.ar)"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "url": {
+      "raw": "https://api.tiendanube.com/v1/{{STORE_ID}}/products",
+      "protocol": "https",
+      "host": ["api", "tiendanube", "com"],
+      "path": ["v1", "{{STORE_ID}}", "products"]
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "event": "customer/updated",
+  "data": {
+    "customer": {
+      "id": 99,
+      "email": "test@mail.com",
+      "name": "Juan Perez",
+      "phone": "1133334444",
+      "orders_count": 4,
+      "total_spent": "65000",
+      "accepts_marketing": true
+    }
+  }
+}

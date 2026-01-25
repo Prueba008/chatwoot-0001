@@ -1,0 +1,106 @@
+{
+  "info": {
+    "name": "Chatwoot Tiendanube Native",
+    "_postman_id": "d2c6c1a3-0c7c-4bf4-9b40-9f8c4e5f1a01",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET Products (Dashboard session required)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/integrations/tiendanube/products?page=1&per_page=20",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "integrations",
+            "tiendanube",
+            "products"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "per_page",
+              "value": "20"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "POST Webhook Orders (local test)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"event\": \"order/created\",\n  \"data\": {\n    \"order\": {\n      \"id\": 999001,\n      \"number\": \"1001\",\n      \"financial_status\": \"paid\",\n      \"total\": \"12000\",\n      \"line_items\": [\n        {\n          \"name\": \"Producto A\",\n          \"quantity\": 2,\n          \"sku\": \"SKU-A\"\n        }\n      ],\n      \"customer\": {\n        \"id\": 99,\n        \"email\": \"test@mail.com\",\n        \"name\": \"Juan Perez\",\n        \"phone\": \"1133334444\",\n        \"orders_count\": 3,\n        \"total_spent\": \"50000\",\n        \"accepts_marketing\": true\n      }\n    }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/webhooks/tiendanube/7208693/orders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "webhooks",
+            "tiendanube",
+            "7208693",
+            "orders"
+          ]
+        }
+      }
+    },
+    {
+      "name": "POST Webhook Customers (local test)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"event\": \"customer/updated\",\n  \"data\": {\n    \"customer\": {\n      \"id\": 99,\n      \"email\": \"test@mail.com\",\n      \"name\": \"Juan Perez\",\n      \"phone\": \"1133334444\",\n      \"orders_count\": 4,\n      \"total_spent\": \"65000\",\n      \"accepts_marketing\": true\n    }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/webhooks/tiendanube/7208693/customers",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "webhooks",
+            "tiendanube",
+            "7208693",
+            "customers"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    }
+  ]
+}

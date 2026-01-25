@@ -1,0 +1,27 @@
+{
+  "event": "order/created",
+  "data": {
+    "order": {
+      "id": 999001,
+      "number": "1001",
+      "financial_status": "paid",
+      "total": "12000",
+      "line_items": [
+        {
+          "name": "Producto A",
+          "quantity": 2,
+          "sku": "SKU-A"
+        }
+      ],
+      "customer": {
+        "id": 99,
+        "email": "test@mail.com",
+        "name": "Juan Perez",
+        "phone": "1133334444",
+        "orders_count": 3,
+        "total_spent": "50000",
+        "accepts_marketing": true
+      }
+    }
+  }
+}
