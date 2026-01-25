@@ -172,3 +172,22 @@ Ver logs del server.
 - Para webhooks externos, exponer Chatwoot con Nginx + SSL.
 - Rotá el token si ya lo publicaste en chats o repos.
 
+# STATUS
+
+•	✅ Token de API validado: Funciona correctamente.
+
+•	✅ Estructura de tienda: Confirmada (existen datos).
+
+•	✅ Procedimiento de widget: Claro y validado.
+
+•	✅ Geracion de código inicia.
+
+•	⏳ Pendiente: Ejecutar script de discovery.
+
+•	⏳ Pendiente  : Instalar ide VS
+
+•	⏳ Pendiente  : Instalar proyectoMVP 1.0
+
+•	⏳ Pendiente  : Compilar código.
+
+•	⏳ Pendiente  : Despliegue y pruebas
