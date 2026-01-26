@@ -152,6 +152,13 @@ curl -X POST http://localhost:3000/webhooks/tiendanube/7208693/orders \
   -H "Content-Type: application/json" \
   -d @samples/tiendanube_order_created.json
 ```
+```bash
+curl -X GET "https://api.tiendanube.com/v1/7208693/products" \
+  -H "Authentication: bearer 10a0d6d2934d898bca691cd0c4db8f5d9ecfff32" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: app-chatwoot (srozenberg@frba.utn.edu.ar)"
+
+```
 
 Ver logs del server.
 
