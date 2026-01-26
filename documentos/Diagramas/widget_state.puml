@@ -1,0 +1,28 @@
+@startuml
+title Máquina de Estados - Widget Tiendanube en Chatwoot
+
+[*] --> Init
+
+Init --> Loading : iframe loads\nGET /tiendanube-widget
+Loading --> Unauthorized : auth inválida\n(401)
+Loading --> CacheCheck : auth OK
+
+CacheCheck --> Ready : cache HIT\nrender HTML
+CacheCheck --> Fetching : cache MISS
+
+Fetching --> Ready : TN 200\ncache + render
+Fetching --> ErrorTN : TN 401/429/5xx\nfallback
+
+Ready --> Filtering : input search / filtros
+Filtering --> Ready : actualizar listado
+
+Ready --> Copying : click "copiar"
+Copying --> Ready : toast OK / error
+
+Ready --> Opening : click "ver en tienda"
+Opening --> Ready : vuelve al widget
+
+Unauthorized --> [*]
+ErrorTN --> [*]
+
+@enduml

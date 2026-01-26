@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-3 bg-slate-50">
+  <div class="flex items-center justify-between mb-3">
+    <div>
+      <div class="text-sm font-bold text-slate-800">Tiendanube</div>
+      <div class="text-xs text-slate-500" id="meta"></div>
+    </div>
+    <button id="refreshBtn" class="text-xs px-2 py-1 rounded bg-white border">Refrescar</button>
+  </div>
+
+  <input id="q" class="w-full mb-3 p-2 border rounded" placeholder="Buscar..." />
+
+  <div id="list" class="space-y-2"></div>
+
+  <script>
+    const token = new URLSearchParams(location.search).get("token") || "";
+    const headers = { "x-widget-token": token };
+
+    async function fetchProducts() {
+      const q = document.getElementById("q").value || "";
+      const r = await fetch(`/api/products?q=${encodeURIComponent(q)}`, { headers });
+      if (!r.ok) throw new Error("No se pudo cargar productos");
+      return r.json();
+    }
+
+    async function adjustStock(variant_id, delta) {
+      const request_id = crypto.randomUUID();
+      const r = await fetch("/api/stock/adjust", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...headers },
+        body: JSON.stringify({ variant_id, delta, request_id })
+      });
+      if (!r.ok) throw new Error("No se pudo ajustar stock");
+      return r.json();
+    }
+
+    function card(p) {
+      const v = p.variant;
+      const url = p.url;
+      const safeName = (p.name || "").replaceAll("<","&lt;").replaceAll(">","&gt;");
+      return `
+      <div class="bg-white border rounded p-2 flex gap-3">
+        <img src="${p.image}" class="w-10 h-10 rounded object-cover bg-slate-100" />
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-semibold truncate">${safeName}</div>
+          <div class="text-xs text-blue-600 font-bold">$${p.price}</div>
+          <div class="text-[11px] text-slate-600">Stock: <span class="font-bold">${p.stock}</span> | Variant: ${v.id}</div>
+
+          <div class="mt-2 flex items-center gap-2">
+            <button class="px-2 py-1 text-xs border rounded" data-act="dec" data-vid="${v.id}">-1</button>
+            <button class="px-2 py-1 text-xs border rounded" data-act="inc" data-vid="${v.id}">+1</button>
+            <input class="w-16 p-1 text-xs border rounded" placeholder="set" data-act="setVal" data-vid="${v.id}"/>
+            <button class="px-2 py-1 text-xs border rounded" data-act="set" data-vid="${v.id}">Set</button>
+            <a class="ml-auto text-xs underline" target="_blank" href="${url}">Ver</a>
+            <button class="text-xs px-2 py-1 border rounded" data-act="copy" data-url="${url}">Copiar</button>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    async function render() {
+      const list = document.getElementById("list");
+      list.innerHTML = "Cargando...";
+      const data = await fetchProducts();
+      document.getElementById("meta").innerText = `${data.items.length} productos`;
+      list.innerHTML = data.items.map(card).join("");
+    }
+
+    document.getElementById("q").addEventListener("input", () => render().catch(console.error));
+    document.getElementById("refreshBtn").addEventListener("click", () => render().catch(console.error));
+
+    document.addEventListener("click", async (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      const act = b.dataset.act;
+
+      if (act === "copy") {
+        await navigator.clipboard.writeText(b.dataset.url);
+        return;
+      }
+
+      const vid = Number(b.dataset.vid);
+      if (!vid) return;
+
+      try {
+        if (act === "inc") await adjustStock(vid, +1);
+        if (act === "dec") await adjustStock(vid, -1);
+
+        if (act === "set") {
+          const input = document.querySelector(`input[data-act="setVal"][data-vid="${vid}"]`);
+          const val = Number(input.value);
+          if (!Number.isFinite(val)) return;
+          await fetch("/api/stock/set", {
+            method: "POST",
+            headers: { "Content-Type":"application/json", ...headers },
+            body: JSON.stringify({ variant_id: vid, new_stock: val, request_id: crypto.randomUUID() })
+          });
+        }
+
+        await render();
+      } catch (err) {
+        console.error(err);
+        alert("Error ajustando stock");
+      }
+    });
+
+    render().catch(console.error);
+  </script>
+</body>
+</html>

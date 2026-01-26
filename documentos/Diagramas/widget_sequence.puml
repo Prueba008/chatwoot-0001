@@ -1,0 +1,53 @@
+@startuml
+title Secuencia - Widget Tiendanube embebido en Chatwoot
+
+actor Agente as A
+participant "Chatwoot Agent UI\n(Dashboard Host)" as CW
+participant "Browser\n(iframe Widget)" as B
+participant "Middleware Node/Express" as MW
+database "Cache TTL\n(in-memory/Redis)" as C
+participant "Tiendanube API" as TN
+
+A -> CW: Abre conversación
+CW -> B: Render Dashboard App iframe\nsrc=/tiendanube-widget?token=...
+
+B -> MW: GET /tiendanube-widget?token=...
+MW -> MW: Validar token/basic auth
+alt Auth inválida
+  MW --> B: 401 Unauthorized + HTML error
+  return
+end
+
+MW -> C: GET products:page1
+alt Cache HIT
+  C --> MW: productos[]
+  MW -> MW: Sanitizar (escapeHtml)\nGenerar HTML+JS
+  MW --> B: 200 HTML Widget
+else Cache MISS
+  MW -> TN: GET /v1/{storeId}/products\n?per_page=100&page=1
+  alt TN 200 OK
+    TN --> MW: productos JSON
+    MW -> C: SET products:page1 TTL
+    MW -> MW: Sanitizar (escapeHtml)\nGenerar HTML+JS
+    MW --> B: 200 HTML Widget
+  else TN error (401/429/5xx)
+    TN --> MW: Error
+    MW -> MW: Log status/body
+    MW --> B: 500 HTML fallback amigable
+    return
+  end
+end
+
+== Interacciones UI ==
+A -> B: Escribe en buscador / clic filtros
+B -> B: Filtrar en memoria (JS)
+
+A -> B: Click "Copiar link"
+B -> B: navigator.clipboard.writeText(url)\n+ toast
+
+opt Insertar texto en composer (si Chatwoot lo soporta)
+  B -> CW: postMessage {type: CHATWOOT_INSERT_TEXT, text: "..."}
+  CW --> B: (ACK / no-op)
+end
+
+@enduml

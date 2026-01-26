@@ -1,0 +1,38 @@
+@startuml
+title Componentes - Integración Widget Tiendanube en Dashboard Chatwoot
+
+package "Chatwoot" {
+  [Agent UI] as UI
+  [Dashboard Apps Host] as DASH
+  [Widget iframe container] as IFRAME
+  [Message Composer] as COMPOSER
+}
+
+package "Middleware Node/Express" {
+  [GET /tiendanube-widget\nHTML+JS] as WIDGET
+  [GET /health] as HEALTH
+  [Auth Widget\n(token/basic auth)] as AUTH
+  [Sanitizador\nescapeHtml/XSS] as SAN
+  [Cache TTL\n(in-memory/Redis)] as CACHE
+  [Tiendanube Client\nAxios] as TNCLIENT
+}
+
+package "Tiendanube" {
+  [Tiendanube REST API\n/v1/{storeId}/products] as TNAPI
+}
+
+UI --> DASH
+DASH --> IFRAME
+IFRAME --> WIDGET
+
+WIDGET --> AUTH
+WIDGET --> SAN
+WIDGET --> CACHE
+WIDGET --> TNCLIENT
+TNCLIENT --> TNAPI
+
+HEALTH --> UI
+
+IFRAME ..> COMPOSER : postMessage opcional\nCHATWOOT_INSERT_TEXT
+
+@enduml

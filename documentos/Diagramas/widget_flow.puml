@@ -1,0 +1,50 @@
+@startuml
+title Chatwoot Dashboard App (Widget) -> Middleware -> Tiendanube (Flow)
+
+start
+:Agente abre una conversación en Chatwoot;
+:Chatwoot renderiza Dashboard App (iframe);
+
+:Browser carga URL del widget\nGET /tiendanube-widget?token=...;
+
+if (¿Auth Widget OK?\n(token/basic auth)) then (NO)
+  :Responder 401 Unauthorized;
+  :Render pantalla de error del widget;
+  stop
+else (SI)
+endif
+
+if (¿Cache vigente?\nproducts:page1 TTL) then (HIT)
+  :Leer productos desde Cache;
+  :Generar HTML (Tailwind) + JS (filtros/busqueda);
+  :Render widget en panel lateral;
+else (MISS)
+  :Llamar Tiendanube API\nGET /v1/{storeId}/products?per_page=100&page=1;
+
+  if (¿TN responde 200 OK?) then (NO)
+    :Log error (status, body);
+    :Generar HTML fallback amigable;
+    :Render widget con error;
+    stop
+  else (SI)
+    :Parse JSON productos;
+    :Guardar en cache (TTL);
+    :Sanitizar campos (escapeHtml);
+    :Generar HTML + JS;
+    :Render widget;
+  endif
+endif
+
+:Agente interactúa con el widget\n(buscar/filtrar);
+:JS filtra en memoria (sin backend);
+if (Acción del agente) then (Copiar link)
+  :navigator.clipboard.writeText(url);
+  :Mostrar toast "Copiado";
+elseif (Acción del agente) then (Abrir producto)
+  :window.open(url, "_blank");
+elseif (Acción del agente) then (Insertar en composer - opcional)
+  :postMessage -> Chatwoot\nCHATWOOT_INSERT_TEXT (si existe listener);
+endif
+
+stop
+@enduml

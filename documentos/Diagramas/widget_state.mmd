@@ -1,0 +1,17 @@
+stateDiagram-v2
+  [*] --> Init
+  Init --> Loading
+  Loading --> Unauthorized: 401 auth invalid
+  Loading --> CacheCheck: auth ok
+  CacheCheck --> Ready: cache hit
+  CacheCheck --> Fetching: cache miss
+  Fetching --> Ready: tn 200 + cache
+  Fetching --> ErrorTN: tn 401/429/5xx
+  Ready --> Filtering: search/filtros
+  Filtering --> Ready
+  Ready --> Copying: copiar
+  Copying --> Ready
+  Ready --> Opening: abrir link
+  Opening --> Ready
+  Unauthorized --> [*]
+  ErrorTN --> [*]

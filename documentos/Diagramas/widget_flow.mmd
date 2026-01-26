@@ -1,0 +1,17 @@
+flowchart TD
+  A[Agente abre conversación] --> B[Chatwoot carga Dashboard App (iframe)]
+  B --> C[GET /tiendanube-widget?token=...]
+  C --> D{Auth Widget OK?}
+  D -- No --> E[401 + Error UI]
+  D -- Sí --> F{Cache HIT? (TTL)}
+  F -- Sí --> G[Render HTML+JS desde cache]
+  F -- No --> H[GET Tiendanube /products page=1]
+  H --> I{TN 200 OK?}
+  I -- No --> J[Fallback error + logs]
+  I -- Sí --> K[Cachear + Sanitizar + Render]
+  G --> L[Agente busca/filtra (JS local)]
+  K --> L
+  L --> M{Acción}
+  M --> N[Copiar link/info + toast]
+  M --> O[Abrir producto]
+  M --> P[postMessage a Chatwoot (opcional)]

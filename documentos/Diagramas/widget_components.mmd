@@ -1,0 +1,28 @@
+flowchart LR
+  subgraph Chatwoot
+    UI[Agent UI]
+    DASH[Dashboard Apps Host]
+    IFRAME[Widget iframe]
+    COMPOSER[Message Composer]
+  end
+
+  subgraph Middleware[Node/Express]
+    WIDGET[GET /tiendanube-widget\nHTML+JS]
+    AUTH[Auth token/basic]
+    SAN[escapeHtml/XSS]
+    CACHE[(Cache TTL)]
+    TNCLIENT[Axios Tiendanube Client]
+    HEALTH[GET /health]
+  end
+
+  subgraph Tiendanube
+    TNAPI[REST API /v1/{storeId}/products]
+  end
+
+  UI --> DASH --> IFRAME --> WIDGET
+  WIDGET --> AUTH --> WIDGET
+  WIDGET --> SAN --> WIDGET
+  WIDGET --> CACHE
+  WIDGET --> TNCLIENT --> TNAPI
+  HEALTH --> UI
+  IFRAME -. postMessage opcional .-> COMPOSER

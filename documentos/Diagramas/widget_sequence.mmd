@@ -1,0 +1,40 @@
+sequenceDiagram
+  actor A as Agente
+  participant CW as Chatwoot UI (Dashboard Host)
+  participant B as Browser (iframe Widget)
+  participant MW as Middleware Node/Express
+  participant C as Cache TTL (Redis/In-memory)
+  participant TN as Tiendanube API
+
+  A->>CW: Abre conversación
+  CW->>B: Render iframe /tiendanube-widget?token=...
+  B->>MW: GET /tiendanube-widget?token=...
+  MW->>MW: Validar token/basic auth
+
+  alt Auth inválida
+    MW-->>B: 401 + HTML error
+  else Auth OK
+    MW->>C: GET products:page1
+    alt Cache hit
+      C-->>MW: productos[]
+      MW-->>B: 200 HTML+JS
+    else Cache miss
+      MW->>TN: GET /products?per_page=100&page=1
+      alt 200 OK
+        TN-->>MW: productos JSON
+        MW->>C: SET products:page1 TTL
+        MW-->>B: 200 HTML+JS
+      else error 401/429/5xx
+        TN-->>MW: error
+        MW-->>B: 500 HTML fallback
+      end
+    end
+  end
+
+  A->>B: Busca/filtra
+  B->>B: Filtrado local (JS)
+  A->>B: Copiar link
+  B->>B: Clipboard + toast
+  opt postMessage opcional
+    B->>CW: postMessage CHATWOOT_INSERT_TEXT
+  end
